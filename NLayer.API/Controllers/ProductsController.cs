@@ -10,19 +10,27 @@ namespace NLayer.API.Controllers
     public class ProductsController : CustomBaseController
     {
         private readonly IMapper _mapper;
-        private readonly IService<Product> _service;
+        private readonly IProductService _service;
 
-        public ProductsController(IMapper mapper, IService<Product> service)
+        public ProductsController(IMapper mapper, IProductService service)
         {
             _mapper = mapper;
             _service = service;
         }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetProductsWithCategory()
+        {
+            return CreateActionResult(await _service.GetProductsWithCategory());
+
+        }
+
         [HttpGet]
         public async Task<IActionResult> All()
         {
             var products = await _service.GetAllAsync();
             var productsDtos = _mapper.Map<List<ProductDto>>(products.ToList());
-            return CreateActionResult(CustomResponseDto<List<ProductDto>>.Success(200,productsDtos));
+            return CreateActionResult(CustomResponseDto<List<ProductDto>>.Success(200, productsDtos));
         }
 
         [HttpGet("{id}")]
@@ -44,7 +52,7 @@ namespace NLayer.API.Controllers
         [HttpPut]
         public async Task<IActionResult> Update(ProductUpdateDto productDto)
         {
-          await _service.UpdateAsync(_mapper.Map<Product>(productDto));
+            await _service.UpdateAsync(_mapper.Map<Product>(productDto));
             return CreateActionResult(CustomResponseDto<NoContentDto>.Success(204));
         }
 
@@ -52,8 +60,8 @@ namespace NLayer.API.Controllers
         public async Task<IActionResult> Remove(int id)
         {
             var product = await _service.GetByIdAsync(id);
-             await _service.RemoveAsync(product);
-             _mapper.Map<ProductDto>(product);
+            await _service.RemoveAsync(product);
+            _mapper.Map<ProductDto>(product);
             return CreateActionResult(CustomResponseDto<NoContentDto>.Success(204));
         }
     }
